@@ -4,6 +4,7 @@ var fs = require('fs');
 var exists = fs.existsSync;
 var logger = require('./logger');
 var suitcss = require('..');
+var rework = require('rework');
 var path = require('path');
 var resolve = path.resolve;
 var program = require('commander');
@@ -21,6 +22,7 @@ program
   .option('-c, --compress', 'compress output')
   .option('-i, --import-root [path]', 'the root directory for imported css files', '')
   .option('-v, --verbose', 'log verbose output for debugging')
+  .option('-d, --depends', 'show list of imported css files')
   .option('-w, --watch', 'watch the input file for changes');
 
 /**
@@ -58,6 +60,7 @@ var input = program.args[0] ? resolve(program.args[0]) : null;
 var output = program.args[1] ? resolve(program.args[1]) : null;
 var importRoot = program.importRoot;
 var verbose = program.verbose;
+var depends = program.depends;
 var regen = program.watch && input && output;
 
 /**
@@ -90,14 +93,21 @@ function run () {
     if (err) logger.throw(err);
     var css = buffer.toString();
 
+    var opts = { compress: program.compress, dir: importRoot, source: input, path: path.dirname(input), depends: [input] };
+
     try {
-      css = suitcss(css, { compress: program.compress, dir: importRoot, source: input });
+      css = suitcss(css, opts);
     } catch (e) {
       e.css = css;
       logger.throw(e);
     }
 
-    write(output, css + '\n');
+    if (output) write(output, css + '\n');
     if (verbose && output) logger.log('write', output);
+
+    if (depends) {
+      // Write to stdout a list of css files that the input css file depends on.
+      console.log(opts.depends.join('\n')+'\n');
+    }
   });
 }
