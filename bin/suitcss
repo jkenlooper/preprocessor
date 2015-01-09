@@ -4,6 +4,8 @@ var fs = require('fs');
 var exists = fs.existsSync;
 var logger = require('./logger');
 var suitcss = require('..');
+var importer_files = require('../../rework-import-paths');
+var rework = require('rework');
 var path = require('path');
 var resolve = path.resolve;
 var program = require('commander');
@@ -21,6 +23,7 @@ program
   .option('-c, --compress', 'compress output')
   .option('-i, --import-root [path]', 'the root directory for imported css files', '')
   .option('-v, --verbose', 'log verbose output for debugging')
+  .option('-f, --files', 'show list of imported files')
   .option('-w, --watch', 'watch the input file for changes');
 
 /**
@@ -58,6 +61,7 @@ var input = program.args[0] ? resolve(program.args[0]) : null;
 var output = program.args[1] ? resolve(program.args[1]) : null;
 var importRoot = program.importRoot;
 var verbose = program.verbose;
+var files = program.files;
 var regen = program.watch && input && output;
 
 /**
@@ -90,8 +94,11 @@ function run () {
     if (err) logger.throw(err);
     var css = buffer.toString();
 
+    var opts = { compress: program.compress, dir: importRoot, source: input, path: path.dirname(input), files: [input] };
+
+    if (!files) {
     try {
-      css = suitcss(css, { compress: program.compress, dir: importRoot, source: input });
+      css = suitcss(css, opts);
     } catch (e) {
       e.css = css;
       logger.throw(e);
@@ -99,5 +106,13 @@ function run () {
 
     write(output, css + '\n');
     if (verbose && output) logger.log('write', output);
+    }
+
+    if (files) {
+      var css = rework(css)
+          .use(importer_files(opts));
+
+      write(output, opts.files.join('\n')+'\n');
+    }
   });
 }

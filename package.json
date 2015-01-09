@@ -19,6 +19,7 @@
     "read-file-stdin": "0.0.3",
     "rework": "^1.0.0",
     "rework-suit": "^4.0.0",
+    "rework-import-paths": "2.0.0",
     "write-file-stdout": "0.0.2"
   },
   "devDependencies": {
