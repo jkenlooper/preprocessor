@@ -22,6 +22,7 @@
     "read-file-stdin": "0.0.3",
     "rework": "^1.0.0",
     "rework-suit": "^4.0.0",
+    "rework-import": "git://github.com/jkenlooper/rework-import.git#depends",
     "url-regex": "^2.1.1",
     "write-file-stdout": "0.0.2"
   },
