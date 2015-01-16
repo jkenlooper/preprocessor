@@ -32,7 +32,10 @@ describe('features', function () {
     it('should add ' + name + ' support', function () {
       var input = read('fixtures/' + name);
       var output = read('fixtures/' + name + '.out');
-      assert.equal(suitcss(input, { root: 'test/fixtures' }).trim(), output.trim());
+      assert.equal(suitcss(input, { 
+        root: 'test/fixtures',
+        path: 'test/fixtures' 
+      }).trim(), output.trim());
     });
   });
 });
@@ -100,6 +103,15 @@ describe('cli', function () {
       assert(err);
       assert(err.code == 1);
       assert(-1 != stderr.indexOf('not found'));
+      done();
+    });
+  });
+
+  it('should show a list of imported css files on depends', function (done) {
+    listofimports = "test/fixtures/cli/simple.css\ntest/fixtures/cli/sub/sub.css\n\n";
+    exec('bin/suitcss --depends test/fixtures/cli/import.css', function (err, stdout) {
+      if (err) return done(err);
+      assert.equal( stdout, listofimports );
       done();
     });
   });

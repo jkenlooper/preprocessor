@@ -38,6 +38,9 @@ program.on('--help', function () {
   console.log('    # configure the import root directory:');
   console.log('    $ suitcss --import-root src/css input.css output.css');
   console.log();
+  console.log('    # get a list of css files imported:');
+  console.log('    $ suitcss --depends input.css');
+  console.log();
   console.log('    # watch the input file for changes:');
   console.log('    $ suitcss --watch input.css output.css');
   console.log();
@@ -93,7 +96,8 @@ function run () {
     if (err) logger.throw(err);
     var css = buffer.toString();
 
-    var opts = { compress: program.compress, dir: importRoot, source: input, path: path.dirname(input), depends: [input] };
+    var opts = { compress: program.compress, dir: importRoot, source: input, path: path.dirname(input) };
+    opts.depends = [];
 
     try {
       css = suitcss(css, opts);
@@ -102,10 +106,12 @@ function run () {
       logger.throw(e);
     }
 
-    if (output) write(output, css + '\n');
+    if (!depends) write(output, css + '\n');
     if (verbose && output) logger.log('write', output);
 
     if (depends) {
+      if (output) write(output, css + '\n');
+
       // Write to stdout a list of css files that the input css file depends on.
       console.log(opts.depends.join('\n')+'\n');
     }
